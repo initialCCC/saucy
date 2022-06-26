@@ -12,7 +12,7 @@ config :saucy, SaucyWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [view: SaucyWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Saucy.PubSub,
-  live_view: [signing_salt: "JshdPQFV"]
+  live_view: [signing_salt: "XrJZNeV7DCADXLbLure5WZPFwAwJlnT4"]
 
 # Configure esbuild (the version is required)
 config :esbuild,

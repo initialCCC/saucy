@@ -12,12 +12,11 @@ sass.Syntax syntaxFromFormat(Uint8List format) {
     return sass.Syntax.scss;
   }
 
-  throw ("invalid format $strFormat"); // should never occur or smt rlyyyy sketchy was written to let it in
+  throw ("invalid format $strFormat");
 }
 
 // https://stackoverflow.com/questions/54844119/how-to-get-bytes-of-a-string-in-dart
 List<int>? toCSS(String source, {sass.Syntax syntax = sass.Syntax.scss}) {
-  // defaults to scss
   try {
     var result = sass.compileStringToResult(source,
         syntax: syntax,
@@ -52,7 +51,7 @@ void main(List<String> arguments) {
       buffer.addByte(byte);
     }
 
-    // prase 4 byte packet size
+    // parse 4 byte packet size as uint32
     var packetSize = ByteData.sublistView(buffer.takeBytes()).getUint32(0, Endian.big);
 
     // format is 4 bytes

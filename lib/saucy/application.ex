@@ -1,11 +1,16 @@
 defmodule Saucy.Application do
   use Application
+  @workers_count Application.compile_env!(:saucy, :workers_count)
 
   @impl true
   def start(_type, _args) do
+    unless is_integer(@workers_count) and @workers_count > 0 do
+      raise "Expected a non neg int for the workers, got #{inspect(@workers_count)}"
+    end
+
     children = [
       SaucyWeb.Telemetry,
-      {NimblePool, worker: {SassPool, []}, name: SassPool, pool_size: 5},
+      {NimblePool, worker: {Saucy.SassPool, []}, name: Saucy.SassPool, pool_size: @workers_count},
       {Phoenix.PubSub, name: Saucy.PubSub},
       SaucyWeb.Endpoint
     ]

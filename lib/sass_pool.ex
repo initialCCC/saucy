@@ -1,4 +1,4 @@
-defmodule SassPool do
+defmodule Saucy.SassPool do
   require Logger
   @behaviour NimblePool
   @executable Application.app_dir(:saucy, ["priv/sassy/bin/sassy.exe"])
@@ -8,7 +8,10 @@ defmodule SassPool do
     Process.flag(:trap_exit, true)
 
     port =
-      Port.open({:spawn_executable, @executable}, [:binary, :exit_status, :use_stdio, packet: 4])
+      Port.open(
+        {:spawn_executable, @executable},
+        [:binary, :exit_status, :use_stdio, packet: 4]
+      )
 
     {:ok, port, []}
   end

@@ -4,7 +4,7 @@ defmodule SaucyWeb.RoomChannel do
   @impl true
   def join("room:lobby", _payload, socket) do
     Process.flag(:trap_exit, true)
-    {:ok, socket}
+    {:ok, assign(socket, :task, nil)}
   end
 
   @impl true
@@ -23,7 +23,7 @@ defmodule SaucyWeb.RoomChannel do
     kill_task(task)
 
     # spawning a separate task ensures that the websocket doesnt block
-    task = Task.async(SassPool, :compile, [format, body])
+    task = Task.async(Saucy.SassPool, :compile, [format, body])
 
     {:noreply, assign(socket, :task, task)}
   end
@@ -31,7 +31,7 @@ defmodule SaucyWeb.RoomChannel do
   @impl true
   def handle_info({ref, converted}, %{assigns: %{task: %Task{ref: ref}}} = socket) do
     # we discard the result if the message is from a previous task
-    # it is possible that a task might finish before we cancel it in the handle_in
+    # it is possible that a task might finish before we cancel it in the c:handle_in
     # in which case the newer task's ref is different than the received one
     push(socket, "converted", %{"body" => converted})
     {:noreply, assign(socket, :task, nil)}
@@ -42,13 +42,11 @@ defmodule SaucyWeb.RoomChannel do
     {:noreply, socket}
   end
 
+  # stops the pool from either connecting the port to another task
+  # and it receiving the converted data (this kills the port and restarts it to avoid that)
+  # or to stop the task from waiting for a port to be available (this cancels the checkout)
   @impl true
-  def terminate(_reason, %{assigns: %{task: task}}) do
-    # stops the pool from either connecting the port to another task
-    # and it receiving the converted data (this kills the port and restarts it to avoid that)
-    # or to stop the task from waiting for a port to be available (this cancels the checkout)
-    kill_task(task)
-  end
+  def terminate(_reason, %{assigns: %{task: task}}), do: kill_task(task)
 
   defp kill_task(%{pid: pid}), do: Process.exit(pid, :kill)
   defp kill_task(_), do: :ok

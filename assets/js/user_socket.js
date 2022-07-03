@@ -5,12 +5,13 @@ let socket = new Socket("/socket", {})
 socket.connect()
 
 let channel = socket.channel("room:lobby", {})
-let copyButton  = document.getElementById("copy")
-let inputArea   = document.getElementById("input")
-let outputArea  = document.getElementById("output") 
-let scssButton  = document.getElementById("from-scss")
-let sassButton  = document.getElementById("from-sass")
-let clearButton = document.getElementById("clear-all")
+let copyButton   = document.getElementById("copy")
+let inputArea    = document.getElementById("input")
+let outputArea   = document.getElementById("output") 
+let scssButton   = document.getElementById("from-scss")
+let sassButton   = document.getElementById("from-sass")
+let clearButton  = document.getElementById("clear-all")
+let importInput = document.getElementById("import-file")
 
 const handleScss = (_event) => {
   channel.push("convert", {format: "scss", body: inputArea.value.trim()})
@@ -25,38 +26,37 @@ const handleClear = (_event) => {
   outputArea.value = ''
 }
 
-const handlePlaceHolder = () => {
-  console.log("clearing place holder")
-}
-
 const handleCopy = (_event) => {
   navigator.clipboard.writeText(outputArea.value)
 }
 
 const handleConverted = (payload) => {
   if (payload.body) {
+    outputArea.style.color = 'black'
     outputArea.value = payload.body
   } else {
-    outputArea.value = ''
-    outputArea.placeholder = 'invalid input...'
-    setTimeout(handlePlaceHolder, 1500)
-    console.log("failed converting")
+    outputArea.style.color = 'red'
+    outputArea.value = 'invalid input'
   }
 }
 
-const scream = () => {
-  console.log("SCREAAAAMING")
+// https://plnkr.co/edit/DbBfnc6XaMppCvkEoqql?p=preview&preview
+const handleFileSelect = (event) => {
+  const reader = new FileReader()
+  reader.onload = handleFileUpload
+  reader.readAsText(event.target.files[0])
 }
 
-setTimeout(scream, 1000);
-
-clearTimeout()
+const handleFileUpload = (event) => {
+  inputArea.value = event.target.result;
+}
 
 channel.on("converted", handleConverted)
 scssButton.addEventListener("click", handleScss)
 sassButton.addEventListener("click", handleSass)
 copyButton.addEventListener("click", handleCopy)
 clearButton.addEventListener("click", handleClear)
+importInput.addEventListener("change", handleFileSelect)
 
 channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp)})

@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :saucy, workers_count: 5
+
 # Configures the endpoint
 config :saucy, SaucyWeb.Endpoint,
   url: [host: "localhost"],
